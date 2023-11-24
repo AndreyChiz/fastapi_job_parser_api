@@ -1,4 +1,4 @@
-from urllib.parse import urlparse, parse_qs, urljoin
+from urllib.parse import urlparse, parse_qs, urljoin, ParseResult
 
 from bs4 import BeautifulSoup
 from dateparser import parse as dateparse
@@ -7,8 +7,14 @@ from ctypes import OrderData
 
 
 class Parser:
+    """Реализует логику парсинга"""
 
     async def parse_pagination(self, page_html: str) -> list[int]:
+        """
+        Парсит в список url страниц из пагинации
+        :param page_html: HTML
+        :return: список url из пагинации
+        """
         if page_html:
             soup: BeautifulSoup = BeautifulSoup(page_html, 'lxml')
             count_items: str = soup.find('div', 'pagination').find('a', {'aria-label': 'Перейти В конец'}).get('href')
@@ -17,18 +23,28 @@ class Parser:
             return numbs_item_very_page_starts
 
     async def parse_items_list(self, page_html: str) -> list[str]:
+        """
+        Парсит в список url карточек заказов
+        :param page_html: HTML
+        :return: список url карточек заказов
+        """
         if page_html:
             soup: BeautifulSoup = BeautifulSoup(page_html, 'lxml')
             items_list = [element['href'] for element in soup.find_all('a', class_='blog_det_link')]
             return items_list
 
     async def parse_item_data(self, page_html: str) -> OrderData:
+        """
+        Парсит данные с карточки заказа в пользовательский объект OrderData
+        :param page_html: html карточки заказа
+        :return: OrderData
+        """
         if page_html:
             soup = BeautifulSoup(page_html, 'lxml')
 
             url: str = soup.find('head').find('link').get('href')
 
-            host: str = urlparse(url)
+            host: ParseResult = urlparse(url)
             host: str = f"{host.scheme}://{host.netloc}"
 
             item_id: str = url.split('-')[-1]
@@ -55,8 +71,9 @@ class Parser:
             seller: str = seller.text.strip() if seller else None
 
             description: BeautifulSoup | None = item_data_container.find('div', 'desc_content')
-            description: str = description.text.strip().replace('\n', '').replace('\r', '').replace('\xa0',
-                                                                                                    '').strip() if description else None
+            description: str = description.text.strip(
+            ).replace('\n', '').replace('\r', '').replace('\xa0', '').strip(
+            ) if description else None
 
             images_list: BeautifulSoup | None = item_data_container.find('div', 'djc_thumbnails djc_thumbs_gal3')
             images_list: list = [urljoin(host, image.get('href')) for image in
@@ -84,7 +101,8 @@ class Parser:
                 seller=seller,
                 description=description,
                 views=int(views) if views.isdigit() else None,
-                expiration_date=dateparse(expiration_date, languages=['ru']).strftime('%d.%m.%Y %H:%M') if post_date else None,
+                expiration_date=dateparse(expiration_date, languages=['ru']).strftime(
+                    '%d.%m.%Y %H:%M') if post_date else None,
                 categories=categories,
                 images=images_list
             )

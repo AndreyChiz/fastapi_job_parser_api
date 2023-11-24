@@ -1,26 +1,38 @@
 import asyncio
-import aiohttp
 from typing import List
 
-from settings import logger
+import aiohttp
+
+from config import logger
 from ctypes import Page
 
 
-class Downloader():
+class Downloader:
+    """Управление загрузкой"""
+
     def __init__(self):
         self.session: aiohttp.ClientSession | None = None
 
     async def _start_session(self) -> None:
+        """Открывает сессию"""
         try:
             self.session = aiohttp.ClientSession()
         except (aiohttp.ClientConnectorError, aiohttp.ClientResponseError) as e:
             logger.error(f"Ошибка при подключении: {e}")
 
     async def _stop_session(self) -> None:
+        """Закрывает сессию >:-)"""
         if self.session:
             await self.session.close()
 
     async def _fetch_html(self, url: str, params: str | None = None, retry: int = 5) -> str:
+        """
+        Выполняет GET запрос, возвращает текст ответа
+        :param url:
+        :param params:
+        :param retry: количество попыток при неудачном соединении
+        :return: html страницы
+        """
         while retry > 0:
             try:
                 async with self.session.get(url, params=params) as response:
@@ -31,7 +43,6 @@ class Downloader():
                             history=response.history,
                             status=response.status,
                             message=f"Недопустимый статус запроса на {url} {response.status}",
-                            os_error=None
                         )
                     return await response.text()
             except Exception as e:
@@ -41,18 +52,20 @@ class Downloader():
             else:
                 continue
 
-
-    async def download_html_from_url_list(self, pages: List[Page]) -> List[str]:
+    async def download_html_from_url_list(self, pages: List[Page]) -> tuple:
+        """Загружает HTML страниц из списка пользовательских объектов Pages"""
         await self._start_session()
         try:
-            page_html_list = await asyncio.gather(*[self._fetch_html(page.url, params=page.params) for page in pages])
+            page_html_list = await asyncio.gather(
+                *[self._fetch_html(page.url, params=page.params) for page in pages])
             return page_html_list
         except Exception:
-            return []
+            return list()
         finally:
             await self._stop_session()
 
     async def download_html_from_url(self, page: Page):
+        """Загружает HTML по url и headers из пользовательского объекта Page"""
         await self._start_session()
         try:
             page_html = await self._fetch_html(page.url, params=page.params)
@@ -61,12 +74,12 @@ class Downloader():
             await self._stop_session()
 
 
-# Пример использования
 async def main():
     downloader = Downloader()
     page = Page(url="https://procapit234alist.ru/obyavleniya/ishchu-proizvoditelej-uslugi-po-poshivu-5")
     page_html = await downloader.download_html_from_url(page)
     print(page_html)
+
 
 if __name__ == "__main__":
     asyncio.run(main())
