@@ -25,4 +25,5 @@ class OrderData:
     views: Optional[int] = None
     expiration_date: Optional[str] = None
     categories: Optional[str] = None
+    # images: Optional[str] = None
     images: Optional[List] = field(default_factory=list)

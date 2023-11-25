@@ -2,15 +2,16 @@ import asyncio
 import time
 from urllib.parse import urljoin
 
+from database import Database
+from downloader import Downloader
 from logger import logger
 from models import Page, OrderData
-from downloader import Downloader
 from parser import Parser
-from database import Database
 
 
 class Scraper:
     """Получение"""
+
     def __init__(self, host: str, main_page_path: str):
         self._host: str = host
         self.main_page = Page(urljoin(self._host, main_page_path), params={'start': 0})
@@ -42,7 +43,7 @@ class Scraper:
             orders.append(await self._parser.parse_item_data(page_html))
         return orders
 
-    async def get_data(self) -> list[OrderData]:
+    async def update_data(self) -> list[OrderData]:
         """Получает данные заказов в список пользовательских объектов OrderData"""
         orders_data_list = list()
         pages_urls_list_from_pagination = await self._get_pages_from_pagination()
@@ -52,7 +53,13 @@ class Scraper:
                 orders_data_list.extend(await self._get_orders_data(orders_html_list))
         self.database.save_orders_to_database(orders_data_list)
         logger.debug(f'Получено элементов: {len(orders_data_list)} ')
+
         return orders_data_list
+
+    async def get_data(self):
+        json_data = self.database.get_all_orders_as_json()
+        logger.debug(json_data)
+        return json_data
 
 
 async def main():
@@ -61,10 +68,10 @@ async def main():
     main_page = 'obyavleniya/ishchu-proizvoditelej-uslugi-po-poshivu-5'
 
     scraper = Scraper(host, main_page)
-    orders_data_list = await scraper.get_data()
-
-    print(*orders_data_list, sep='\n')
-
+    orders_data_list = await scraper.update_data()
+    json_data = await scraper.get_data()
+    print(json_data)
+    # print(*orders_data_list, sep='\n')
 
     end_time = time.time()  # Замеряем время после выполнения кода
     elapsed_time = end_time - start_time
