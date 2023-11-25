@@ -21,7 +21,6 @@ class Database:
             'user': config.USER,
             'password': config.PASSWORD,
             'db': config.DATABASE,
-            'port': 3307,  # Изменен порт на 3307
             'charset': 'utf8mb4',
             'cursorclass': pymysql.cursors.DictCursor
         }
@@ -100,4 +99,4 @@ class Database:
 if __name__ == '__main__':
     db = Database()
     db.check_connection()
-    print(db.get_all_orders_as_json())
+    # print(db.get_all_orders_as_json())

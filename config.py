@@ -6,3 +6,5 @@ class DatabaseConfig:
     USER = 'procapi'
     PASSWORD = 'procapi'
     DATABASE = 'procapi'
+
+

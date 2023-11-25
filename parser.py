@@ -77,7 +77,7 @@ class Parser:
 
             images_list: BeautifulSoup | None = item_data_container.find('div', 'djc_thumbnails djc_thumbs_gal3')
             images_list: str = ', '.join([urljoin(host, image.get('href')) for image in
-                                 images_list.findAll('a')]) if images_list else None
+                                          images_list.findAll('a')]) if images_list else None
 
             additional: BeautifulSoup | None = item_data_container.find('div', 'additional')
             additional: list = additional.findAll('span', 'row_value') if additional else None

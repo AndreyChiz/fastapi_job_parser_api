@@ -24,9 +24,14 @@ scheduler = AsyncIOScheduler()
 async def update_data_job():
     await scrapper.update_data()
 
-
 scheduler.add_job(update_data_job, 'interval', minutes=5)
 scheduler.start()
+
+
+async def startup_event():
+    await update_data_job()
+
+app.add_event_handler("startup", startup_event)
 
 order_example = {"id": 12081,
                  "url": "https://procapitalist.ru/obyavleniya/ad/ishchu-proizvoditelej-uslugi-po-poshivu-5/ishchem-podryadchika-po-poshivu-chekhlov-dlya-avtokresel-i-kolyasok-12081",
