@@ -13,7 +13,6 @@ class Downloader:
     def __init__(self):
         self.session: aiohttp.ClientSession | None = None
 
-
     async def _fetch_html(self, url: str, params: str | None = None, retry: int = 5) -> str:
         """
         Выполняет GET запрос, возвращает текст ответа
