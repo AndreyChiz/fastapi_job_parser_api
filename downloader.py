@@ -3,8 +3,8 @@ from typing import List
 
 import aiohttp
 
-from config import logger
-from ctypes import Page
+from logger import logger
+from models import Page
 
 
 class Downloader:
@@ -13,17 +13,6 @@ class Downloader:
     def __init__(self):
         self.session: aiohttp.ClientSession | None = None
 
-    async def _start_session(self) -> None:
-        """Открывает сессию"""
-        try:
-            self.session = aiohttp.ClientSession()
-        except (aiohttp.ClientConnectorError, aiohttp.ClientResponseError) as e:
-            logger.error(f"Ошибка при подключении: {e}")
-
-    async def _stop_session(self) -> None:
-        """Закрывает сессию >:-)"""
-        if self.session:
-            await self.session.close()
 
     async def _fetch_html(self, url: str, params: str | None = None, retry: int = 5) -> str:
         """
@@ -52,26 +41,26 @@ class Downloader:
             else:
                 continue
 
-    async def download_html_from_url_list(self, pages: List[Page]) -> tuple:
+    async def download_html_from_url_list(self, pages: List[Page]) -> List[str]:
         """Загружает HTML страниц из списка пользовательских объектов Pages"""
-        await self._start_session()
+        self.session = aiohttp.ClientSession()
         try:
             page_html_list = await asyncio.gather(
                 *[self._fetch_html(page.url, params=page.params) for page in pages])
             return page_html_list
         except Exception:
-            return list()
+            return []
         finally:
-            await self._stop_session()
+            await self.session.close()
 
     async def download_html_from_url(self, page: Page):
         """Загружает HTML по url и headers из пользовательского объекта Page"""
-        await self._start_session()
+        self.session = aiohttp.ClientSession()
         try:
             page_html = await self._fetch_html(page.url, params=page.params)
             return page_html
         finally:
-            await self._stop_session()
+            await self.session.close()
 
 
 async def main():

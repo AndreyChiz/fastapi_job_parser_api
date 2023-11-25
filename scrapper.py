@@ -2,26 +2,29 @@ import asyncio
 import time
 from urllib.parse import urljoin
 
-from ctypes import Page, OrderData
+from logger import logger
+from models import Page, OrderData
 from downloader import Downloader
 from parser import Parser
-from config import logger
+from database import Database
 
 
 class Scraper:
-
+    """Получение"""
     def __init__(self, host: str, main_page_path: str):
         self._host: str = host
         self.main_page = Page(urljoin(self._host, main_page_path), params={'start': 0})
         self._url: str = urljoin(self._host, main_page_path)
         self._downloader = Downloader()
         self._parser = Parser()
+        self.database = Database()
 
     async def _get_pages_from_pagination(self) -> list[Page]:
-        """Получает данные  из пагинации"""
+        """Получает данные из пагинации"""
         page_html = await self._downloader.download_html_from_url(self.main_page)
         pages_wrap_list = await self._parser.parse_pagination(page_html)
-        pages_list = [Page(self.main_page.url, params={'start': item}) for item in pages_wrap_list] if pages_wrap_list else None
+        pages_list = [Page(self.main_page.url, params={'start': item}) for item in
+                      pages_wrap_list] if pages_wrap_list else None
         return pages_list
 
     async def _get_orders_pages(self, page: Page) -> list[Page]:
@@ -47,9 +50,9 @@ class Scraper:
             for pare_url in pages_urls_list_from_pagination:
                 orders_html_list = await self._get_orders_pages(pare_url)
                 orders_data_list.extend(await self._get_orders_data(orders_html_list))
+        self.database.save_orders_to_database(orders_data_list)
+        logger.debug(f'Получено элементов: {len(orders_data_list)} ')
         return orders_data_list
-
-
 
 
 async def main():
@@ -61,11 +64,12 @@ async def main():
     orders_data_list = await scraper.get_data()
 
     print(*orders_data_list, sep='\n')
-    logger.debug(len(orders_data_list))
+
 
     end_time = time.time()  # Замеряем время после выполнения кода
     elapsed_time = end_time - start_time
     print(f"Время выполнения кода: {elapsed_time} секунд")
+
 
 if __name__ == '__main__':
     asyncio.run(main())

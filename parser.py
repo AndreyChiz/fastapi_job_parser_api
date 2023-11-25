@@ -3,7 +3,7 @@ from urllib.parse import urlparse, parse_qs, urljoin, ParseResult
 from bs4 import BeautifulSoup
 from dateparser import parse as dateparse
 
-from ctypes import OrderData
+from models import OrderData
 
 
 class Parser:
