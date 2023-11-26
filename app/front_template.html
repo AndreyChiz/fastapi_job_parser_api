@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order List</title>
+</head>
+<body>
+    <h1>Order List</h1>
+    <ul>
+        {% for order in orders %}
+            <li>
+                <strong>Order ID:</strong> {{ order.id }}<br>
+                <strong>Title:</strong> {{ order.title }}<br>
+                <!-- Добавьте другие поля заказа по аналогии -->
+                <hr>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

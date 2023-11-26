@@ -3,8 +3,9 @@ from typing import List
 
 import uvicorn
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.openapi.models import Info
+from starlette.templating import Jinja2Templates
 
 from models import OrderData
 from scrapper import Scraper
@@ -37,8 +38,10 @@ app = FastAPI(
     ),
 )
 
+
 scrapper = Scraper(host, main_page)
 scheduler = AsyncIOScheduler()
+templates = Jinja2Templates(directory=".")
 
 async def update_data_job():
     await scrapper.update_data()
@@ -56,6 +59,15 @@ async def get_orders():
     if not data:
         raise HTTPException(status_code=404, detail="No orders found")
     return data
+
+@app.get("/", description="Возвращает список данных всех заказов.", response_model=List[OrderData])
+async def get_orders(request: Request):
+    data = await scrapper.get_data()
+    if not data:
+        raise HTTPException(status_code=404, detail="No orders found")
+    return templates.TemplateResponse("front_template.html", {"request": request, "orders": data})
+
+
 
 # @app.get("/",)
 # async def get_orders():
