@@ -4,6 +4,7 @@ from typing import List
 import uvicorn
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI
+from fastapi.openapi.models import Info
 
 from models import OrderData
 from scrapper import Scraper
@@ -27,6 +28,13 @@ app = FastAPI(
     # debug=True,
     docs_url='/api/docs',
     title='Procapi API',
+    description="API for getting data from site",
+    version="0.0.1",
+    openapi_info=Info(
+        title="Procapi API",
+        description="API for getting data from site",
+        version="0.0.1",
+    ),
 )
 
 scrapper = Scraper(host, main_page)
@@ -49,9 +57,9 @@ async def get_orders():
         raise HTTPException(status_code=404, detail="No orders found")
     return data
 
-@app.get("/",)
-async def get_orders():
-    return "halo"
+# @app.get("/",)
+# async def get_orders():
+#     return "halo"
 
 
 if __name__ == "__main__":

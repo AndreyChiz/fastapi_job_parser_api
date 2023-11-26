@@ -1,6 +1,19 @@
 version: '3'
 
 services:
+
+  nginx:
+    container_name: nginx
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx_conf/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - api
+    networks:
+      - procapi
+
   api:
     container_name: api
     image: api
