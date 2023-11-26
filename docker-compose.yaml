@@ -13,6 +13,8 @@ services:
       - api
     networks:
       - procapi
+    env_file:
+      - .env
 
   api:
     container_name: api
@@ -29,6 +31,8 @@ services:
     volumes:
       - ./app:/app
     command: sh -c "pip install --upgrade pip && pip install -r requirements.txt && python app.py"
+    env_file:
+      - .env
 
   # Database
   mysql:
@@ -40,12 +44,14 @@ services:
       - ./mysql_volume:/var/lib/mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: procapi
-      MYSQL_DATABASE: procapi
-      MYSQL_USER: procapi
-      MYSQL_PASSWORD: procapi
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DATABASE}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     networks:
       - procapi
+    env_file:
+      - .env
 
 networks:
   procapi:

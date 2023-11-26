@@ -52,13 +52,12 @@ class Scraper:
                 orders_html_list = await self._get_orders_pages(pare_url)
                 orders_data_list.extend(await self._get_orders_data(orders_html_list))
         self.database.save_orders_to_database(orders_data_list)
-        logger.debug(f'Получено элементов: {len(orders_data_list)} ')
+        logger.debug(f'Обновлено! Получено элементов: {len(orders_data_list)} ')
 
         return orders_data_list
 
     async def get_data(self):
         json_data = self.database.get_all_orders_as_json()
-        logger.debug(json_data)
         return json_data
 
 
@@ -68,7 +67,7 @@ async def main():
     main_page = 'obyavleniya/ishchu-proizvoditelej-uslugi-po-poshivu-5'
 
     scraper = Scraper(host, main_page)
-    orders_data_list = await scraper.update_data()
+    await scraper.update_data()
     json_data = await scraper.get_data()
     print(json_data)
     # print(*orders_data_list, sep='\n')
