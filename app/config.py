@@ -2,7 +2,7 @@ class DatabaseConfig:
     """
     Класс с настройками базы данных.
     """
-    HOST = 'localhost'
+    HOST = 'mysql'
     USER = 'procapi'
     PASSWORD = 'procapi'
     DATABASE = 'procapi'

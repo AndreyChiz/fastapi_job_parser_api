@@ -1,12 +1,28 @@
 version: '3'
 
 services:
+  api:
+    container_name: api
+    image: api
+    depends_on:
+      - mysql
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - procapi
+    volumes:
+      - ./app:/app
+    command: sh -c "pip install --upgrade pip && pip install -r requirements.txt && python app.py"
+
   # Database
   mysql:
     image: mysql:8.2
     container_name: mysql
     ports:
-      - 3306:3306
+      - "3306:3306"
     volumes:
       - ./mysql_volume:/var/lib/mysql
     restart: always
@@ -20,5 +36,3 @@ services:
 
 networks:
   procapi:
-
-# volumes секция больше не нужна

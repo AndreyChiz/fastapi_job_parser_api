@@ -8,7 +8,7 @@ clean:
 
 
 run:
-	docker-compose up -d
+	docker-compose up -d --build
 
 stop:
 	docker-compose stop

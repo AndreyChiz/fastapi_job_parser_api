@@ -49,6 +49,10 @@ async def get_orders():
         raise HTTPException(status_code=404, detail="No orders found")
     return data
 
+@app.get("/",)
+async def get_orders():
+    return "halo"
+
 
 if __name__ == "__main__":
-    uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True, proxy_headers=True)

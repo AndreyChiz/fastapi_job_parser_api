@@ -24,7 +24,7 @@ class Downloader:
         while retry > 0:
             try:
                 async with self.session.get(url, params=params) as response:
-                    logger.debug(f'{url} {response.status}')
+                    # logger.debug(f'{url} {response.status}')
                     if response.status != 200:
                         raise aiohttp.ClientResponseError(
                             request_info=response.request_info,
